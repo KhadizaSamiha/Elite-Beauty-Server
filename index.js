@@ -29,11 +29,23 @@ async function run() {
         await client.connect();
 
         const classesCollection = client.db("eliteDb").collection("classes");
+        const usersCollection = client.db("eliteDb").collection("users")
 
         // class related apis
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result);
+        })
+        // users related apis
+        app.post('/users', async(req, res) =>{
+            const user = req.body;
+            const query = {email : user.email}
+            const existingUser = await usersCollection.findOne(query)
+            if(existingUser){
+                return res.send({message : "user already exist"})
+            }
+            const result = await usersCollection.insertOne(user);
+            res.send(result)
         })
 
         // Send a ping to confirm a successful connection
