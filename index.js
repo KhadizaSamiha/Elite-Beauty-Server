@@ -56,19 +56,36 @@ async function run() {
         })
 
         // class related apis
+
+        // get approved class
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find({status : 'approved'}).toArray();
             res.send(result);
         })
+
+        // addClass
         app.post('/classes', async(req, res) =>{
             const newClass = req.body;
             const result = await classesCollection.insertOne(newClass);
             res.send(result);
 
         })
-        app.get('/classes', async (req, res) => {
+        // manage Classes get
+        app.get('/classesPending', async (req, res) => {
             const result = await classesCollection.find({status : 'pending'}).toArray();
             res.send(result);
+        })
+        // manage classes patch
+        app.patch('/classesApprove/:id', async(req, res) =>{
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: "approve"
+                },
+            }
+            const result = await classesCollection.updateOne(filter, updateDoc);
+            res.send(result)
         })
         
 
