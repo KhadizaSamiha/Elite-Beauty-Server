@@ -60,6 +60,12 @@ async function run() {
             const result = await classesCollection.find({status : 'approved'}).toArray();
             res.send(result);
         })
+        app.post('/classes', async(req, res) =>{
+            const newClass = req.body;
+            const result = await classesCollection.insertOne(newClass);
+            res.send(result);
+
+        })
 
         // users related apis
         app.post('/users', verifyJWT, async (req, res) => {
