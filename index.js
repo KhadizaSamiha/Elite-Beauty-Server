@@ -55,15 +55,15 @@ async function run() {
             res.send({ token })
         })
         // verify admin 
-        const verifyAdmin = async (req, res, next) => {
-            const email = req.decoded.email;
-            const query = { email: email }
-            const user = await usersCollection.findOne(query);
-            if (user?.role !== 'admin') {
-              return res.status(403).send({ error: true, message: 'forbidden message' });
-            }
-            next();
-          }
+        // const verifyAdmin = async (req, res, next) => {
+        //     const email = req.decoded.email;
+        //     const query = { email: email }
+        //     const user = await usersCollection.findOne(query);
+        //     if (user?.role !== 'admin') {
+        //       return res.status(403).send({ error: true, message: 'forbidden message' });
+        //     }
+        //     next();
+        //   }
 
         // class related apis
 
@@ -121,6 +121,15 @@ async function run() {
             const result = await classesCollection.find(query).toArray();
             res.send(result);
         })
+        // sort classes for popularclasses section
+        app.get('/classesPopular', async(req, res) =>{
+            const query ={};
+            const options ={
+                sort : {"enrolledStudents" : -1}
+            }
+            const result = await classesCollection.find(query, options).toArray();
+            res.send(result);
+        })
         
 
         // users related apis
@@ -141,7 +150,7 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result)
         })
-        app.get('/users',verifyJWT,verifyAdmin, async (req, res) => {
+        app.get('/users',verifyJWT, async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
         })
@@ -167,7 +176,7 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.send(result)
         })
-        //get admin api 
+      
         app.get('/users/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
       
