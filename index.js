@@ -133,14 +133,14 @@ async function run() {
         
 
         // users related apis
-        app.post('/users', verifyJWT, async (req, res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body;
 
             // verify jwt 
-            const decodedEmail = req.decoded.email;
-            if (user.email !== decodedEmail) {
-                return res.status(403).send({ error: true, message: 'forbidden access' })
-            }
+            // const decodedEmail = req.decoded.email;
+            // if (user.email !== decodedEmail) {
+            //     return res.status(403).send({ error: true, message: 'forbidden access' })
+            // }
 
             const query = { email: user.email }
             const existingUser = await usersCollection.findOne(query)
@@ -187,6 +187,18 @@ async function run() {
             const query = { email: email }
             const user = await usersCollection.findOne(query);
             const result = { admin: user?.role === 'admin' }
+            res.send(result);
+          })
+        app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+      
+            if (req.decoded.email !== email) {
+              res.send({ instructor: false })
+            }
+      
+            const query = { email: email }
+            const user = await usersCollection.findOne(query);
+            const result = { instructor: user?.role === 'instructor' }
             res.send(result);
           })
 
