@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors')
 var jwt = require('jsonwebtoken');
 require('dotenv').config();
-const stripe= require('stripe')(process.env.PAYMENT_SECRET_KEY)
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 
 const port = process.env.PORT || 5000;
 
@@ -43,7 +43,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const classesCollection = client.db("eliteDb").collection("classes");
         const usersCollection = client.db("eliteDb").collection("users");
@@ -204,20 +204,20 @@ async function run() {
             const result = { instructor: user?.role === 'instructor' }
             res.send(result);
         })
-        app.get('/users/instructor', async(req, res) =>{
-            const result = await usersCollection.find({role : 'instructor'}).toArray();
+        app.get('/users/instructor', async (req, res) => {
+            const result = await usersCollection.find({ role: 'instructor' }).toArray();
             res.send(result);
         })
 
         //   ...............
         // payment related apis
 
-        app.post('/payment', async(req, res) =>{
+        app.post('/payment', async (req, res) => {
             const SelectedClass = req.body;
             const result = await paymentCollection.insertOne(SelectedClass);
             res.send(result);
         })
-        app.get('/paymentSelected', async(req, res) =>{
+        app.get('/paymentSelected', async (req, res) => {
             const result = await paymentCollection.find().toArray();
             res.send(result);
         })
@@ -226,15 +226,21 @@ async function run() {
             const { price } = req.body;
             const amount = parseInt(price * 100);
             const paymentIntent = await stripe.paymentIntents.create({
-              amount: amount,
-              currency: 'usd',
-              payment_method_types: ['card']
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
             });
-      
+
             res.send({
-              clientSecret: paymentIntent.client_secret
+                clientSecret: paymentIntent.client_secret
             })
-          })
+        })
+        app.delete('/paymentDelete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await paymentCollection.deleteOne(query);
+            res.send(result);
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
